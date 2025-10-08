@@ -1,0 +1,299 @@
+﻿@model Veggies_EXE201.Models.ViewModels.LoginViewModel
+
+@{
+    ViewData["Title"] = "Đăng Nhập";
+    Layout = null; // Bỏ layout chính để trang hiển thị độc lập
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Veggies</title>
+    <!-- Thêm Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Thêm Font Awesome cho Icon (cho Social Login) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLMD/CDQ6JStSEx87y90jK7rX3y6rYF85f9FzVz8gI2UeXl8D3A8F5W0F3W4A5Gg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        :root {
+            --primary-green: #38c172;
+            --light-bg: #f0f2f5;
+            --card-radius: 16px;
+        }
+        .container{
+            margin-left:650px;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px 0;
+        }
+
+        .login-card {
+            background-color: #ffffff;
+            border-radius: var(--card-radius);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 400px; /* Chiều rộng phù hợp cho form đăng nhập một cột */
+            overflow: hidden;
+        }
+
+        /* HEADER SECTION STYLING */
+        .login-header {
+            background-color: var(--primary-green);
+            color: white;
+            padding: 25px 0;
+            text-align: center;
+            border-radius: var(--card-radius) var(--card-radius) 0 0;
+        }
+
+            .login-header h1 {
+                font-size: 1.5rem;
+                font-weight: 700;
+                margin-bottom: 5px;
+            }
+
+            .login-header p {
+                font-size: 0.9rem;
+                opacity: 0.9;
+                margin: 0;
+            }
+
+        .login-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        /* FORM BODY STYLING */
+        .login-form-body {
+            padding: 30px 40px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+        }
+        /* Style cho input và label nằm trên cùng một hàng */
+        .input-inline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+            .input-inline .form-control {
+                width: 60%; /* Tùy chỉnh độ rộng cho input */
+                padding: 8px 12px;
+                background-color: #e9ecef; /* Màu nền nhẹ cho input */
+                border: 1px solid #ced4da;
+            }
+
+            .input-inline .form-label {
+                margin-right: 15px;
+                white-space: nowrap;
+            }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 10px 15px;
+            border: 1px solid #ced4da;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+            .form-control:focus, .form-select:focus {
+                border-color: var(--primary-green);
+                box-shadow: 0 0 0 0.25rem rgba(56, 193, 114, 0.25);
+            }
+
+        /* Remember Me & Forgot Password */
+        .options-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+            .options-row a {
+                color: var(--primary-green);
+                text-decoration: none;
+                font-weight: 500;
+            }
+
+        /* Button Styling */
+        .btn-login {
+            background-color: var(--primary-green) !important;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+            .btn-login:hover {
+                background-color: #2b9e5e !important;
+                transform: translateY(-1px);
+            }
+
+        /* Social Login */
+        .social-login .btn {
+            border-radius: 8px;
+            font-size: 0.95rem;
+            padding: 10px;
+        }
+
+        .btn-google {
+            background-color: #ffffff;
+            color: #4285F4;
+            border: 1px solid #ced4da;
+            transition: background-color 0.1s;
+        }
+
+            .btn-google:hover {
+                background-color: #f0f0f0;
+                border-color: #adb5bd;
+            }
+
+        .btn-facebook {
+            background-color: #4267B2;
+            color: white;
+            transition: background-color 0.1s;
+        }
+
+            .btn-facebook:hover {
+                background-color: #365899;
+            }
+
+        /* Footer Links */
+        .footer-links {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+            .footer-links span {
+                margin: 0 8px;
+                cursor: default;
+            }
+
+        /* Responsive */
+        @@media (max-width: 576px) {
+            .login-card {
+                max-width: 95%;
+            }
+
+            .login-form-body {
+                padding: 25px 20px;
+            }
+
+            .input-inline {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+                .input-inline .form-control {
+                    width: 100%;
+                    margin-top: 5px;
+                }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="login-card">
+                    <!-- HEADER SECTION -->
+                    <div class="login-header">
+                        <div class="login-icon"><i class="fas fa-user-circle"></i></div>
+                        <h1>Chào mừng trở lại!</h1>
+                        <p>Đăng nhập để tiếp tục mua sắm</p>
+                    </div>
+
+                    <!-- FORM BODY -->
+                    <div class="login-form-body">
+
+                        <!-- Form Đăng Nhập -->
+                        <form asp-action="Login">
+
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+
+                            <!-- EMAIL -->
+                            <div class="form-group input-inline">
+                                <label asp-for="Email" class="form-label">Email</label>
+                                <input asp-for="Email" class="form-control" placeholder="Tên đăng nhập" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger"></span>
+
+                            <!-- MẬT KHẨU -->
+                            <div class="form-group input-inline">
+                                <label asp-for="Password" class="form-label">Mật khẩu</label>
+                                <input asp-for="Password" class="form-control" type="password" placeholder="Mật khẩu" />
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger"></span>
+
+                            <!-- Tùy chọn -->
+                            <div class="options-row">
+                                <div class="form-check">
+                                    <input class="form-check-input" asp-for="RememberMe" type="checkbox" id="rememberMe">
+                                    <label class="form-check-label" for="rememberMe">
+                                        Ghi nhớ đăng nhập
+                                    </label>
+                                </div>
+                                <a href="#">Quên mật khẩu?</a>
+                            </div>
+
+                            <!-- Nút Đăng nhập -->
+                            <div class="form-group d-grid">
+                                <input type="submit" value="Đăng nhập" class="btn btn-login btn-lg" />
+                            </div>
+
+                        </form>
+
+                        <!-- Đăng nhập bằng mạng xã hội -->
+                        <p class="text-center text-muted my-3">Hoặc đăng nhập với</p>
+                        <div class="row social-login">
+                            <div class="col-6">
+                                <button type="button" class="btn btn-google w-100">
+                                    <i class="fab fa-google me-2"></i>Google
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button type="button" class="btn btn-facebook w-100">
+                                    <i class="fab fa-facebook-f me-2"></i>Facebook
+                                </button>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Đăng ký mới -->
+                        <p class="text-center">
+                            Chưa có tài khoản? <a asp-action="Register" style="color: var(--primary-green); font-weight: 600;">Đăng ký ngay</a>
+                        </p>
+
+                        <!-- Footer Links -->
+                        <div class="text-center mt-4 footer-links">
+                            <span>Bảo mật cao</span>
+                            <span>Mã hóa SSL</span>
+                            <span>Bảo vệ dữ liệu</span>
+                        </div>
+                    </div> <!-- end .login-form-body -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Thêm Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+﻿@model Veggies_EXE201.Models.Product
+@{
+    ViewData["Title"] = Model.ProductName;
+}
+
+<style>
+    .product-detail-img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .product-price-detail {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #198754; /* Bootstrap success color */
+    }
+
+    .quantity-input {
+        width: 80px;
+    }
+</style>
+
+<div class="container mt-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Product" asp-action="Index">Sản phẩm</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.ProductName</li>
+        </ol>
+    </nav>
+
+    
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <img src="@(Model.VietGapCertificateUrl ?? "/images/default-product.png")" alt="@Model.ProductName" class="product-detail-img" />
+        </div>
+
+        <div class="col-lg-6">
+            <h1 class="display-5 fw-bold">@Model.ProductName</h1>
+
+            @if (Model.Category != null)
+            {
+                <p class="text-muted fs-5">Danh mục: @Model.Category.CategoryName</p>
+            }
+
+            <p class="product-price-detail my-4">@string.Format("{0:N0}", Model.Price) VNĐ</p>
+
+            <p class="lead">@Model.Description</p>
+
+            <hr class="my-4">
+
+            @if (Model.Stock > 0)
+            {
+                <span class="badge bg-success fs-6">Còn hàng (@Model.Stock sản phẩm)</span>
+            }
+            else
+            {
+                <span class="badge bg-danger fs-6">Hết hàng</span>
+            }
+
+            <form class="mt-4">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <label for="quantity" class="form-label">Số lượng:</label>
+                        <input type="number" id="quantity" name="quantity" class="form-control quantity-input" value="1" min="1" max="@Model.Stock">
+                    </div>
+                    <button type="submit" class="btn btn-success btn-lg px-5 py-3" disabled="@(Model.Stock <= 0)">
+                        <i class="fas fa-shopping-cart me-2"></i> Thêm vào giỏ hàng
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-4">
+                <strong>Chứng nhận:</strong> <a href="@Model.VietGapCertificateUrl" target="_blank">VietGAP</a>
+                <br>
+                <strong>Video canh tác:</strong> <a href="@Model.CultivationVideoUrl" target="_blank">Xem video</a>
+            </div>
+        </div>
+    </div>
+</div>
