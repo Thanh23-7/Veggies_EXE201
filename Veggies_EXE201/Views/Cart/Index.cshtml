@@ -1,0 +1,64 @@
+﻿@model Veggies_EXE201.Models.ViewModels.CartViewModel
+@{
+    ViewData["Title"] = "Giỏ hàng của bạn";
+}
+
+<div class="container my-5">
+    <h1 class="mb-4">@ViewData["Title"]</h1>
+
+    @if (Model.CartItems.Count > 0)
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Sản phẩm</th>
+                    <th>Giá</th>
+                    <th>Số lượng</th>
+                    <th>Tạm tính</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.CartItems)
+                {
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="@item.ImageUrl" width="100" class="me-3 rounded" alt="@item.ProductName" />
+                                <div>
+                                    <h5>@item.ProductName</h5>
+                                </div>
+                            </div>
+                        </td>
+                        <td>@string.Format("{0:N0}", item.Price) VNĐ</td>
+                        <td>@item.Quantity</td>
+                        <td>@string.Format("{0:N0}", item.Total) VNĐ</td>
+                        <td>
+                            <a href="#" class="btn btn-sm btn-danger">Xóa</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="row justify-content-end mt-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Tổng cộng</h4>
+                        <h5 class="fw-bold fs-3">@string.Format("{0:N0}", Model.GrandTotal) VNĐ</h5>
+                        <div class="d-grid mt-3">
+                            <a href="#" class="btn btn-success btn-lg">Tiến hành thanh toán</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center">
+            Giỏ hàng của bạn đang trống. <a asp-controller="Product" asp-action="Index">Hãy bắt đầu mua sắm!</a>
+        </div>
+    }
+</div>

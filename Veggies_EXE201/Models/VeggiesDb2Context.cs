@@ -124,6 +124,9 @@ public partial class VeggiesDb2Context : DbContext
                 .HasColumnType("datetime");
             entity.Property(e => e.CultivationVideoUrl).HasMaxLength(255);
             entity.Property(e => e.Price).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.ProductImage)
+                .HasMaxLength(255)
+                .IsUnicode(false);
             entity.Property(e => e.ProductName).HasMaxLength(150);
             entity.Property(e => e.Stock).HasDefaultValue(0);
             entity.Property(e => e.VietGapCertificateUrl).HasMaxLength(255);

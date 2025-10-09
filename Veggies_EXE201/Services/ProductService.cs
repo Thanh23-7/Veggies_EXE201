@@ -74,7 +74,7 @@ namespace Veggies_EXE201.Services
                     ProductName = p.ProductName,
                     Price = p.Price,
                     Description = p.Description,
-                    ImageUrl = p.VietGapCertificateUrl ?? "/images/default-product.png",
+                    ProductImage = p.ProductImage ?? "/images/default-product.png",
                     CategoryName = p.Category?.CategoryName ?? "Không xác định"
                 }).ToList(),
                 Categories = allCategories.Select(c => new ProductListViewModel.CategoryItem

@@ -1,18 +1,27 @@
 ﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using System.Security.Claims;
+using System.Text;
+using Veggies_EXE201.Models;
 using Veggies_EXE201.Models.ViewModels;
 using Veggies_EXE201.Services;
+
 
 namespace Veggies_EXE201.Controllers
 {
     public class AccountController : Controller
     {
         private readonly AuthService _authService;
+   
 
         public AccountController(AuthService authService)
         {
             _authService = authService;
+           
         }
 
         // GET: /Account/Login
@@ -110,6 +119,9 @@ namespace Veggies_EXE201.Controllers
                 return View(model);
             }
         }
+        
+
+
 
         // POST: /Account/Logout
         [HttpPost]

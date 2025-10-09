@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Veggies_EXE201.Models;
 using Veggies_EXE201.Models.ViewModels;
 using Veggies_EXE201.Repositories;
 using Veggies_EXE201.Services;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +20,14 @@ builder.Services.AddDbContext<VeggiesDb2Context>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
-
+// 1. Thêm dịch vụ cho Session
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Thời gian chờ trước khi session hết hạn
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 // Thêm dịch vụ Authentication (nếu bạn dùng Session/Cookie Authentication)
 builder.Services.AddAuthentication("CookieAuth")
@@ -44,10 +53,11 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+
 app.UseRouting();
 
 app.UseAuthorization();
-
+app.UseSession();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
