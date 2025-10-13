@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using Veggies_EXE201.Services;
 
 namespace Veggies_EXE201.Controllers
 {
+    
     public class HomeController : Controller
     {
         private readonly IProductService _productService;

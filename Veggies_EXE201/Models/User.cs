@@ -19,7 +19,7 @@ public partial class User
 
     public string? AvatarUrl { get; set; }
 
-    public string? Role { get; set; }
+    public string? Role { get; set; } //1.Admin   2. Customer  3. Seller
 
     public DateTime? CreatedAt { get; set; }
 
@@ -30,4 +30,6 @@ public partial class User
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+
+    public virtual ShoppingCart? ShoppingCart { get; set; }
 }

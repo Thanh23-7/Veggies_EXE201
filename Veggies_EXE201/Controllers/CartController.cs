@@ -1,74 +1,101 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Veggies_EXE201.Models;
+using Veggies_EXE201.ViewModels;
+using Veggies_EXE201.Helpers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Veggies_EXE201.Helpers;
 using Veggies_EXE201.Models.ViewModels;
-using Veggies_EXE201.Services;
 
-namespace Veggies_EXE201.Controllers
+public class CartController : Controller
 {
-    public class CartController : Controller
+    private readonly VeggiesDb2Context _context;
+    private const string CartSessionKey = "MyCart"; 
+
+    public CartController(VeggiesDb2Context context)
     {
-        private readonly IProductService _productService;
-        public const string CARTKEY = "cart"; // Key để lưu giỏ hàng trong Session
+        _context = context;
+    }
 
-        public CartController(IProductService productService)
+    // GET: /Cart/Index - Hiển thị giỏ hàng
+    public IActionResult Index()
+    {
+        var cartItems = HttpContext.Session.Get<List<CartItemViewModel>>(CartSessionKey) ?? new List<CartItemViewModel>();
+        var viewModel = new CartViewModel { CartItems = cartItems };
+        return View(viewModel);
+    }
+
+    // POST: /Cart/AddToCart - Thêm sản phẩm
+    [HttpPost]
+    public async Task<IActionResult> AddToCart(int productId, int quantity = 1)
+    {
+        var product = await _context.Products.FindAsync(productId);
+        if (product == null) return NotFound();
+
+        var cart = HttpContext.Session.Get<List<CartItemViewModel>>(CartSessionKey) ?? new List<CartItemViewModel>();
+        var existingItem = cart.FirstOrDefault(item => item.ProductId == productId);
+
+        if (existingItem != null)
         {
-            _productService = productService;
+            existingItem.Quantity += quantity;
         }
-
-        // Lấy giỏ hàng từ Session
-        private CartViewModel GetCart()
+        else
         {
-            return HttpContext.Session.Get<CartViewModel>(CARTKEY) ?? new CartViewModel();
-        }
-
-        // Lưu giỏ hàng vào Session
-        private void SaveCart(CartViewModel cart)
-        {
-            HttpContext.Session.Set(CARTKEY, cart);
-        }
-
-        // Action để hiển thị trang giỏ hàng
-        public IActionResult Index()
-        {
-            return View(GetCart());
-        }
-
-        // Action để thêm sản phẩm vào giỏ
-        [HttpPost]
-        public async Task<IActionResult> AddToCart(int productId, int quantity = 1)
-        {
-            var cart = GetCart();
-            var cartItem = cart.CartItems.SingleOrDefault(p => p.ProductId == productId);
-
-            if (cartItem == null) // Nếu sản phẩm chưa có trong giỏ
+            cart.Add(new CartItemViewModel
             {
-                var product = await _productService.GetProductByIdAsync(productId);
-                if (product == null)
+                ProductId = product.ProductId,
+                ProductName = product.ProductName,
+                ProductImage = product.ProductImage,
+                Price = product.Price,
+                Quantity = quantity
+            });
+        }
+
+        HttpContext.Session.Set(CartSessionKey, cart);
+        return RedirectToAction("Index");
+    }
+
+    // === PHẦN BỊ THIẾU BẮT ĐẦU TỪ ĐÂY ===
+
+    // POST: /Cart/UpdateCart - Cập nhật số lượng
+    [HttpPost]
+    public IActionResult UpdateCart(int productId, int quantity)
+    {
+        var cart = HttpContext.Session.Get<List<CartItemViewModel>>(CartSessionKey);
+        if (cart != null)
+        {
+            var itemToUpdate = cart.FirstOrDefault(item => item.ProductId == productId);
+            if (itemToUpdate != null)
+            {
+                if (quantity > 0)
                 {
-                    return NotFound();
+                    itemToUpdate.Quantity = quantity; // Cập nhật số lượng mới
                 }
-                cartItem = new CartItemViewModel
+                else
                 {
-                    ProductId = product.ProductId,
-                    ProductName = product.ProductName,
-                    ImageUrl = product.ProductImage ?? "/images/default-product.png",
-                    Price = product.Price,
-                    Quantity = quantity
-                };
-                cart.CartItems.Add(cartItem);
+                    cart.Remove(itemToUpdate); // Nếu số lượng <= 0, xóa sản phẩm
+                }
+                HttpContext.Session.Set(CartSessionKey, cart);
             }
-            else // Nếu sản phẩm đã có, tăng số lượng
-            {
-                cartItem.Quantity += quantity;
-            }
-
-            SaveCart(cart);
-            return RedirectToAction("Index"); // Chuyển hướng đến trang giỏ hàng
         }
+        return RedirectToAction("Index");
+    }
 
-        // Các action khác như Remove, Update... (sẽ làm sau nếu cần)
+    // POST: /Cart/RemoveFromCart - Xóa một sản phẩm
+    [HttpPost]
+    public IActionResult RemoveFromCart(int productId)
+    {
+        var cart = HttpContext.Session.Get<List<CartItemViewModel>>(CartSessionKey);
+        if (cart != null)
+        {
+            var itemToRemove = cart.FirstOrDefault(item => item.ProductId == productId);
+            if (itemToRemove != null)
+            {
+                cart.Remove(itemToRemove);
+                HttpContext.Session.Set(CartSessionKey, cart);
+            }
+        }
+        return RedirectToAction("Index");
     }
 }

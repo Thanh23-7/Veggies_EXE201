@@ -1,0 +1,54 @@
+﻿@model Veggies_EXE201.ViewModels.OrderHistoryViewModel
+
+@{
+    ViewData["Title"] = "Lịch sử mua hàng";
+}
+
+<div class="container my-5">
+    <h1 class="mb-4">@ViewData["Title"]</h1>
+
+    @if (Model.Orders.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã ĐH</th>
+                        <th>Ngày đặt</th>
+                        <th>Số lượng sản phẩm</th>
+                        <th class="text-end">Tổng tiền</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model.Orders)
+                    {
+                        <tr>
+                            <td><strong>#@order.OrderId</strong></td>
+                            <td>@order.OrderDate?.ToString("dd/MM/yyyy")</td>
+                            <td>@order.ItemCount sản phẩm</td>
+                            <td class="text-end fw-bold">@order.TotalAmount?.ToString("N0") VNĐ</td>
+                            <td class="text-center">
+                                <span class="badge bg-success">@order.Status</span>
+                            </td>
+                            <td class="text-end">
+                                <a asp-controller="Order" asp-action="Details" asp-route-id="@order.OrderId" class="btn btn-sm btn-outline-primary">
+                                    Xem chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center p-4">
+            <h4>Bạn chưa có đơn hàng nào</h4>
+            <p class="mb-0">Hãy bắt đầu mua sắm để xem lịch sử đơn hàng của bạn ở đây nhé!</p>
+            <a asp-controller="Product" asp-action="Index" class="btn btn-primary mt-3">Mua sắm ngay</a>
+        </div>
+    }
+</div>

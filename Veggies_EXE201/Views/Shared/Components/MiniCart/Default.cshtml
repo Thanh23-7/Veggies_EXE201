@@ -1,0 +1,46 @@
+﻿@model List<Veggies_EXE201.Models.ViewModels.CartItemViewModel>
+
+<div class="dropdown">
+    @* Icon giỏ hàng để kích hoạt dropdown *@
+    <a href="#" class="position-relative me-3 text-decoration-none dropdown-toggle" id="cartDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fas fa-shopping-cart fs-5 text-secondary"></i>
+        @if (Model.Any())
+        {
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                @Model.Sum(item => item.Quantity)
+                </span>
+        }
+    </a>
+
+    @* Nội dung dropdown của giỏ hàng *@
+    <div class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="cartDropdown" style="width: 320px;">
+        @if (Model.Any())
+        {
+                <div style="max-height: 300px; overflow-y: auto;">
+                @foreach (var item in Model)
+                {
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="@item.ProductImage" alt="@item.ProductName" class="me-2 rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold small">@item.ProductName</div>
+                                    <small class="text-muted">@item.Quantity x @item.Price.ToString("N0")đ</small>
+                                </div>
+                                <div class="fw-bold text-success small">
+                            @item.Total.ToString("N0")đ
+                                </div>
+                            </div>
+                }
+                </div>
+                <hr class="my-2">
+                <div class="text-center">
+                    <a asp-controller="Cart" asp-action="Index" class="btn btn-success w-100">Xem giỏ hàng chi tiết</a>
+                </div>
+        }
+        else
+        {
+                <div class="text-center p-3">
+                    <p class="mb-0">Giỏ hàng của bạn đang trống.</p>
+                </div>
+        }
+    </div>
+</div>

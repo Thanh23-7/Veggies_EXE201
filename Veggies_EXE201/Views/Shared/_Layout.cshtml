@@ -38,10 +38,7 @@
                             <input class="form-control me-2" type="search" placeholder="Tìm kiếm..." aria-label="Search">
                         </form>
 
-                        <div class="position-relative me-3">
-                            <i class="fas fa-shopping-cart fs-5 text-secondary"></i>
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">1</span>
-                        </div>
+                        @await Component.InvokeAsync("MiniCart")
 
                         @if (User.Identity != null && User.Identity.IsAuthenticated)
                         {
@@ -52,8 +49,8 @@
                                     @fullName
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile"><i class="fas fa-user-edit me-2"></i>Hồ sơ</a></li>
-                                    <li><a class="dropdown-item" asp-controller="Order" asp-action="Index"><i class="fas fa-box-open me-2"></i>Đơn hàng</a></li>
+                                    <li><a class="dropdown-item" asp-controller="User" asp-action="Profile"><i class="fas fa-user-edit me-2"></i>Hồ sơ</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Order" asp-action="History"><i class="fas fa-box-open me-2"></i>Đơn hàng</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <form asp-controller="Account" asp-action="Logout" method="post">

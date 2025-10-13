@@ -15,6 +15,12 @@ public partial class Order
 
     public decimal? TotalAmount { get; set; }
 
+    public string? ShippingAddress { get; set; }
+
+    public string? ShippingPhone { get; set; }
+
+    public string? Notes { get; set; }
+
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();

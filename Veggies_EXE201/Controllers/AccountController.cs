@@ -1,96 +1,90 @@
 ﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Security.Claims;
-using System.Text;
-using Veggies_EXE201.Models;
+using Veggies_EXE201.Models; 
 using Veggies_EXE201.Models.ViewModels;
 using Veggies_EXE201.Services;
-
 
 namespace Veggies_EXE201.Controllers
 {
     public class AccountController : Controller
     {
         private readonly AuthService _authService;
-   
 
         public AccountController(AuthService authService)
         {
             _authService = authService;
-           
         }
 
         // GET: /Account/Login
         [HttpGet]
-        public IActionResult Login()
+        public IActionResult Login(string? returnUrl = null)
         {
-            return View(); // Trả về View chứa form đăng nhập
+            ViewData["ReturnUrl"] = returnUrl;
+            return View();
         }
 
         // POST: /Account/Login
         [HttpPost]
-        [ValidateAntiForgeryToken] // Nên có để chống tấn công CSRF
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
         {
-            // Kiểm tra Validation của ViewModel
+            ViewData["ReturnUrl"] = returnUrl;
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
-            // 1. Xác thực người dùng bằng Service
+            // 1. Xác thực người dùng
             var user = await _authService.ValidateUserCredentials(model);
 
             if (user == null)
             {
-                // Thêm thông báo lỗi nếu xác thực thất bại
                 ModelState.AddModelError(string.Empty, "Email hoặc mật khẩu không đúng.");
                 return View(model);
             }
 
-            // 2. Tạo Claims Identity cho Cookie Authentication
+            // 2. Tạo Claims (các "thẻ bài" thông tin về người dùng)
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Name, user.FullName),
-                new Claim(ClaimTypes.Role, user.Role ?? "User") // Sử dụng trường Role
+                // Lấy Role từ CSDL, nếu không có thì mặc định là "Customer"
+                new Claim(ClaimTypes.Role, user.Role ?? "Customer")
             };
 
-            var claimsIdentity = new ClaimsIdentity(
-                claims, "CookieAuth");
-
+            var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
             var authProperties = new AuthenticationProperties
             {
-                // Đặt thời gian duy trì đăng nhập dựa trên RememberMe
-                IsPersistent = model.RememberMe,
-                ExpiresUtc = model.RememberMe ? DateTimeOffset.UtcNow.AddDays(7) : DateTimeOffset.UtcNow.AddMinutes(30)
+                IsPersistent = model.RememberMe, // Lưu cookie lâu dài nếu người dùng chọn "Remember Me"
+                ExpiresUtc = model.RememberMe ? DateTimeOffset.UtcNow.AddDays(14) : null
             };
 
-            // 3. Đăng nhập người dùng (tạo Cookie)
-            await HttpContext.SignInAsync(
-                "CookieAuth", // Tên Scheme đã đăng ký trong Program.cs
-                new ClaimsPrincipal(claimsIdentity),
-                authProperties);
+            // 3. Đăng nhập người dùng (tạo cookie xác thực)
+            await HttpContext.SignInAsync("CookieAuth", new ClaimsPrincipal(claimsIdentity), authProperties);
 
-            // 4. Chuyển hướng người dùng
-            if (Url.IsLocalUrl(returnUrl))
+            // 4. (Tùy chọn) Lưu UserId vào Session để truy cập nhanh
+            HttpContext.Session.SetInt32("UserId", user.UserId);
+
+            // 5. Chuyển hướng an toàn
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
                 return Redirect(returnUrl);
             }
-
-            return RedirectToAction("Index", "Home"); // Chuyển hướng về trang chủ
+            else
+            {
+                return RedirectToAction("Index", "Home");
+            }
         }
+
         // GET: /Account/Register
         [HttpGet]
         public IActionResult Register()
         {
-            var model = new RegisterViewModel();
-            return View(model); // Trả về View chứa form đăng ký
+            ViewBag.AvailableRoles = GetRoles();
+            return View();
         }
 
         // POST: /Account/Register
@@ -100,35 +94,47 @@ namespace Veggies_EXE201.Controllers
         {
             if (!ModelState.IsValid)
             {
+                ViewBag.AvailableRoles = GetRoles(); // Lỗi: phải tải lại danh sách Role
                 return View(model);
             }
 
-            // Gọi service để đăng ký người dùng
             var (success, error) = await _authService.RegisterUser(model);
 
             if (success)
             {
-                // Đăng ký thành công, chuyển hướng đến trang đăng nhập
                 TempData["SuccessMessage"] = "Đăng ký thành công! Vui lòng đăng nhập.";
                 return RedirectToAction("Login");
             }
             else
             {
-                // Đăng ký thất bại (ví dụ: email đã tồn tại)
                 ModelState.AddModelError(string.Empty, error);
+                ViewBag.AvailableRoles = GetRoles(); // Lỗi: phải tải lại danh sách Role
                 return View(model);
             }
         }
-        
-
-
 
         // POST: /Account/Logout
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
+            // Xóa cookie xác thực
             await HttpContext.SignOutAsync("CookieAuth");
+            // Xóa toàn bộ dữ liệu Session
+            HttpContext.Session.Clear();
+
             return RedirectToAction("Index", "Home");
+        }
+
+        // Hàm helper để tránh lặp code
+        private List<SelectListItem> GetRoles()
+        {
+            return new List<SelectListItem>
+            {
+                new SelectListItem { Value = "Customer", Text = "Khách hàng" },
+                new SelectListItem { Value = "Seller", Text = "Người bán" }
+                // Cân nhắc không hiển thị "Admin" công khai
+            };
         }
     }
 }

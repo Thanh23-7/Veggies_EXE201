@@ -1,0 +1,58 @@
+﻿@model Veggies_EXE201.ViewModels.EditProfileViewModel
+
+@{
+    ViewData["Title"] = "Chỉnh Sửa Hồ Sơ";
+}
+
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header">
+            <h2>@ViewData["Title"]</h2>
+        </div>
+        <div class="card-body">
+            <form asp-action="EditProfile" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <img src="@(Model.ExistingProfilePictureUrl ?? "/images/default-avatar.png")"
+                             class="img-fluid rounded-circle mb-3" alt="Ảnh đại diện hiện tại"
+                             style="width: 150px; height: 150px; object-fit: cover;">
+
+                        <div class="mb-3">
+                            <label asp-for="NewProfilePicture" class="form-label"></label>
+                            <input asp-for="NewProfilePicture" type="file" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label asp-for="FullName" class="form-label"></label>
+                            <input asp-for="FullName" class="form-control" />
+                            <span asp-validation-for="FullName" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="PhoneNumber" class="form-label"></label>
+                            <input asp-for="PhoneNumber" class="form-control" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label"></label>
+                            <textarea asp-for="Address" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-success">Lưu Thay Đổi</button>
+                            <a asp-action="Profile" class="btn btn-secondary">Hủy</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

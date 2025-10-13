@@ -21,6 +21,11 @@ namespace Veggies_EXE201.Services
         /// <summary>
         /// Lấy ViewModel cho trang danh sách sản phẩm, xử lý logic lọc, sắp xếp, phân trang.
         /// </summary>
+        /// 
+        public async Task<IEnumerable<Product>> GetAllProductsAsync()
+        {
+            return await _productRepository.GetAllAsync();
+        }
         public async Task<ProductListViewModel> GetProductsViewModelAsync(string? searchTerm, int? categoryId, decimal? minPrice, decimal? maxPrice, string sortBy, int pageNumber)
         {
             // 1. Lấy dữ liệu gốc từ Repository

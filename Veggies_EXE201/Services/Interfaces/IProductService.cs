@@ -11,6 +11,7 @@ namespace Veggies_EXE201.Services
         Task<ProductListViewModel> GetProductsViewModelAsync(string? searchTerm, int? categoryId, decimal? minPrice, decimal? maxPrice, string sortBy, int pageNumber);
 
         // === CÁC HÀM CRUD MỚI ===
+        Task<IEnumerable<Product>> GetAllProductsAsync();
         Task<Product?> GetProductByIdAsync(int productId);
         Task<IEnumerable<Category>> GetAllCategoriesAsync();
         Task CreateProductAsync(Product product);

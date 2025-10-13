@@ -1,0 +1,92 @@
+﻿@model Veggies_EXE201.ViewModels.CheckoutViewModel
+
+@{
+    ViewData["Title"] = "Thanh toán";
+}
+
+<div class="container mt-5 mb-5">
+    <h2 class="mb-4">Thông tin thanh toán</h2>
+
+    @* Form sẽ gửi dữ liệu đến action ProcessOrder *@
+    <form asp-action="ProcessOrder" method="post">
+        @Html.AntiForgeryToken()
+        <div class="row g-5">
+            <div class="col-md-7">
+                <h4>Thông tin giao hàng</h4>
+                <hr />
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+                }
+
+                <div class="mb-3">
+                    <label asp-for="ShippingFullName" class="form-label"></label>
+                    <input asp-for="ShippingFullName" class="form-control" />
+                    <span asp-validation-for="ShippingFullName" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="ShippingPhone" class="form-label"></label>
+                    <input asp-for="ShippingPhone" class="form-control" />
+                    <span asp-validation-for="ShippingPhone" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="ShippingAddress" class="form-label"></label>
+                    <textarea asp-for="ShippingAddress" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="ShippingAddress" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="OrderNotes" class="form-label"></label>
+                    <textarea asp-for="OrderNotes" class="form-control" rows="2" placeholder="Ví dụ: Giao hàng trong giờ hành chính..."></textarea>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h4>Đơn hàng của bạn</h4>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush mb-3">
+                            @foreach (var item in Model.CartItems)
+                            {
+                                <li class="list-group-item d-flex justify-content-between lh-sm">
+                                    <div>
+                                        <h6 class="my-0">@item.ProductName</h6>
+                                        <small class="text-muted">Số lượng: @item.Quantity</small>
+                                    </div>
+                                    <span class="text-muted">@item.Total.ToString("N0")đ</span>
+                                </li>
+                            }
+                            <li class="list-group-item d-flex justify-content-between">
+                                <strong>Tổng cộng (VND)</strong>
+                                <strong>@Model.TotalAmount.ToString("N0")đ</strong>
+                            </li>
+                        </ul>
+
+                        <h4 class="mt-4">Phương thức thanh toán</h4>
+                        <div class="my-3">
+                            <div class="form-check">
+                                <input id="cod" name="paymentMethod" type="radio" class="form-check-input" value="COD" checked required>
+                                <label class="form-check-label" for="cod">Thanh toán khi nhận hàng (COD)</label>
+                            </div>
+                            <div class="form-check">
+                                <input id="payos" name="paymentMethod" type="radio" class="form-check-input" value="PAYOS" required>
+                                <label class="form-check-label" for="payos">Thanh toán qua VietQR</label>
+                                <img src="/images/payos-logo.jpg" height="24" class="ms-2" alt="PayOS Logo" />
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+                        <button class="w-100 btn btn-primary btn-lg" type="submit">XÁC NHẬN ĐẶT HÀNG</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

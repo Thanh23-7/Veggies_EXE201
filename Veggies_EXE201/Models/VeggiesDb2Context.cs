@@ -17,6 +17,8 @@ public partial class VeggiesDb2Context : DbContext
 
     public virtual DbSet<ActivityLog> ActivityLogs { get; set; }
 
+    public virtual DbSet<CartDetail> CartDetails { get; set; }
+
     public virtual DbSet<Category> Categories { get; set; }
 
     public virtual DbSet<Order> Orders { get; set; }
@@ -28,6 +30,8 @@ public partial class VeggiesDb2Context : DbContext
     public virtual DbSet<Product> Products { get; set; }
 
     public virtual DbSet<Review> Reviews { get; set; }
+
+    public virtual DbSet<ShoppingCart> ShoppingCarts { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
@@ -48,6 +52,20 @@ public partial class VeggiesDb2Context : DbContext
             entity.Property(e => e.Details).HasMaxLength(500);
         });
 
+        modelBuilder.Entity<CartDetail>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__CartDeta__3214EC07E036E09B");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.CartDetails)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_CartDetails_Products");
+
+            entity.HasOne(d => d.ShoppingCart).WithMany(p => p.CartDetails)
+                .HasForeignKey(d => d.ShoppingCartId)
+                .HasConstraintName("FK_CartDetails_ShoppingCarts");
+        });
+
         modelBuilder.Entity<Category>(entity =>
         {
             entity.HasKey(e => e.CategoryId).HasName("PK__Categori__19093A0B73EF8B29");
@@ -62,9 +80,14 @@ public partial class VeggiesDb2Context : DbContext
 
             entity.ToTable(tb => tb.HasTrigger("trg_LogNewOrder"));
 
+            entity.Property(e => e.Notes).HasMaxLength(500);
             entity.Property(e => e.OrderDate)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
+            entity.Property(e => e.ShippingAddress).HasMaxLength(255);
+            entity.Property(e => e.ShippingPhone)
+                .HasMaxLength(20)
+                .IsUnicode(false);
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
                 .HasDefaultValue("Pending");
@@ -152,6 +175,18 @@ public partial class VeggiesDb2Context : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.Reviews)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK__Reviews__UserId__59FA5E80");
+        });
+
+        modelBuilder.Entity<ShoppingCart>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Shopping__3214EC07922A2CBF");
+
+            entity.HasIndex(e => e.UserId, "UQ__Shopping__1788CC4D62C2EB90").IsUnique();
+
+            entity.HasOne(d => d.User).WithOne(p => p.ShoppingCart)
+                .HasForeignKey<ShoppingCart>(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ShoppingCarts_Users");
         });
 
         modelBuilder.Entity<User>(entity =>

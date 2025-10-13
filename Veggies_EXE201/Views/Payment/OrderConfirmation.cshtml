@@ -1,0 +1,43 @@
+﻿@model Veggies_EXE201.Models.Order
+
+@{
+    ViewData["Title"] = "Đặt hàng thành công";
+}
+
+<div class="container text-center mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-5">
+                    <h1 style="font-size: 5rem; color: green;">✔</h1>
+                    <h2 class="card-title">Đặt Hàng Thành Công!</h2>
+                    <p class="lead">Cảm ơn bạn đã tin tưởng và mua hàng tại Veggies.</p>
+                    <p>
+                        Đơn hàng của bạn với mã <strong class="text-primary">#@Model.OrderId</strong> đã được hệ thống ghi nhận.
+                        Chúng tôi sẽ xử lý và liên hệ với bạn trong thời gian sớm nhất.
+                    </p>
+                    <hr>
+
+                    @* --- PHẦN ĐÃ SỬA --- *@
+                    <div class="text-start">
+                        <p>
+                            <strong>Ngày đặt:</strong>
+                            @Model.OrderDate?.ToString("dd/MM/yyyy, HH:mm")
+                        </p>
+                        <p>
+                            <strong>Giao đến:</strong>
+                            @(Model.ShippingAddress ?? "Chưa cập nhật")
+                        </p>
+                        <p>
+                            <strong>Tổng tiền:</strong>
+                            <strong class="fs-5">@Model.TotalAmount?.ToString("N0")đ</strong>
+                        </p>
+                    </div>
+
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-primary mt-4">Tiếp tục mua sắm</a>
+                    <a asp-controller="Order" asp-action="History" class="btn btn-outline-secondary mt-4 ms-2">Xem lịch sử đơn hàng</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

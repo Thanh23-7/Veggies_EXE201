@@ -1,117 +1,116 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Veggies_EXE201.Services;
-using Microsoft.AspNetCore.Http; // Giữ lại nếu bạn cần dùng IFormCollection cho các Action CRUD sau này
+using Microsoft.EntityFrameworkCore;
+using Veggies_EXE201.Models;
+using Veggies_EXE201.Models.ViewModels; // <-- Đảm bảo namespace ViewModel là đúng
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace Veggies_EXE201.Controllers
+public class ProductController : Controller
 {
-    // Kế thừa từ Controller
-    public class ProductController : Controller
+    private readonly VeggiesDb2Context _context;
+
+    public ProductController(VeggiesDb2Context context)
     {
-        // Khai báo Service để sử dụng logic nghiệp vụ
-        private readonly IProductService _productService;
-
-        // Constructor: Dependency Injection để tiêm IProductService
-        public ProductController(IProductService productService)
-        {
-            _productService = productService;
-        }
-
-        /// <summary>
-        /// Action mặc định để hiển thị trang danh sách sản phẩm với các bộ lọc.
-        /// Nhận các tham số từ Query String để thực hiện tìm kiếm, lọc và phân trang.
-        /// </summary>
-        /// <param name="categoryId">ID danh mục được chọn.</param>
-        /// <param name="searchTerm">Từ khóa tìm kiếm.</param>
-        /// <param name="sortOrder">Thứ tự sắp xếp (priceAsc, priceDesc...).</param>
-        /// <param name="minPrice">Mức giá thấp nhất để lọc.</param>
-        /// <param name="maxPrice">Mức giá cao nhất để lọc.</param>
-        /// <param name="page">Số trang hiện tại (mặc định là 1).</param>
-        /// <returns>View chứa ProductListViewModel đã được xử lý.</returns>
-        public async Task<IActionResult> Index(
-            int? categoryId,
-            string searchTerm,
-            string sortOrder,
-            decimal? minPrice,
-            decimal? maxPrice,
-            int page = 1)
-        {
-            var viewModel = await _productService.GetProductsViewModelAsync(
-       searchTerm,
-       categoryId,
-       minPrice,
-       maxPrice,
-       sortOrder,
-       page);
-
-            // Return the View with the ViewModel
-            return View(viewModel);
-        }
-
-        // Action Xem chi tiết sản phẩm
-        // === THÊM ACTION MỚI CHO TRANG CHI TIẾT ===
-        // GET: /Product/Details/5
-        public async Task<IActionResult> Details(int id)
-        {
-            // Gọi service để lấy sản phẩm theo ID
-            var product = await _productService.GetProductByIdAsync(id);
-
-            // Nếu không tìm thấy sản phẩm, trả về trang 404 Not Found
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            // Truyền đối tượng sản phẩm cho View
-            return View(product);
-        }
-
-        /* * Các Action CRUD (Create, Edit, Delete) đã bị loại bỏ/comment để tập trung vào chức năng Shop, 
-         * nhưng bạn có thể thêm lại khi cần triển khai logic quản trị sản phẩm.
-         */
-
-        // // GET: ProductController/Create
-        // public ActionResult Create()
-        // {
-        //     return View();
-        // }
-
-        // // POST: ProductController/Create
-        // [HttpPost]
-        // [ValidateAntiForgeryToken]
-        // public ActionResult Create(IFormCollection collection)
-        // {
-        //     try { return RedirectToAction(nameof(Index)); }
-        //     catch { return View(); }
-        // }
-
-        // // GET: ProductController/Edit/5
-        // public ActionResult Edit(int id)
-        // {
-        //     return View();
-        // }
-
-        // // POST: ProductController/Edit/5
-        // [HttpPost]
-        // [ValidateAntiForgeryToken]
-        // public ActionResult Edit(int id, IFormCollection collection)
-        // {
-        //     try { return RedirectToAction(nameof(Index)); }
-        //     catch { return View(); }
-        // }
-
-        // // GET: ProductController/Delete/5
-        // public ActionResult Delete(int id)
-        // {
-        //     return View();
-        // }
-
-        // // POST: ProductController/Delete/5
-        // [HttpPost]
-        // [ValidateAntiForgeryToken]
-        // public ActionResult Delete(int id, IFormCollection collection)
-        // {
-        //     try { return RedirectToAction(nameof(Index)); }
-        //     catch { return View(); }
-        // }
+        _context = context;
     }
+
+    // GET: /Product/Index
+    public async Task<IActionResult> Index(ProductListViewModel request) // Nhận toàn bộ ViewModel làm tham số
+    {
+        int pageSize = 9; // Hoặc bạn có thể lấy từ request.PageSize nếu muốn
+
+        // 1. Bắt đầu truy vấn
+        var query = _context.Products.Include(p => p.Category).AsQueryable();
+
+        // 2. Áp dụng bộ lọc
+        if (!string.IsNullOrEmpty(request.SearchTerm))
+        {
+            query = query.Where(p => p.ProductName.Contains(request.SearchTerm));
+        }
+        if (request.CategoryId.HasValue)
+        {
+            query = query.Where(p => p.CategoryId == request.CategoryId.Value);
+        }
+        if (request.MinPrice.HasValue)
+        {
+            query = query.Where(p => p.Price >= request.MinPrice.Value);
+        }
+        if (request.MaxPrice.HasValue)
+        {
+            query = query.Where(p => p.Price <= request.MaxPrice.Value);
+        }
+
+        // 3. Áp dụng sắp xếp
+        query = request.CurrentSort switch
+        {
+            "name_desc" => query.OrderByDescending(p => p.ProductName),
+            "price_asc" => query.OrderBy(p => p.Price),
+            "price_desc" => query.OrderByDescending(p => p.Price),
+            _ => query.OrderBy(p => p.ProductName), // Mặc định
+        };
+
+        // 4. Lấy tổng số sản phẩm
+        var totalItems = await query.CountAsync();
+
+        // 5. Áp dụng phân trang và chuyển đổi sang ProductItem
+        var productsForPage = await query
+            .Skip((request.CurrentPage > 0 ? request.CurrentPage - 1 : 0) * pageSize)
+            .Take(pageSize)
+            .Select(p => new ProductListViewModel.ProductItem // <-- Tạo đối tượng ProductItem
+            {
+                ProductId = p.ProductId,
+                ProductName = p.ProductName,
+                ProductImage = p.ProductImage,
+                Price = p.Price,
+                CategoryName = p.Category != null ? p.Category.CategoryName : "Chưa phân loại"
+            })
+            .ToListAsync();
+
+        // Lấy danh sách danh mục cho sidebar
+        var allCategories = await _context.Categories
+            .Select(c => new ProductListViewModel.CategoryItem // <-- Tạo đối tượng CategoryItem
+            {
+                CategoryId = c.CategoryId,
+                CategoryName = c.CategoryName
+            })
+            .ToListAsync();
+
+        // 6. Tạo ViewModel cuối cùng để gửi đến View
+        var viewModel = new ProductListViewModel
+        {
+            Products = productsForPage,
+            Categories = allCategories,
+            TotalItems = totalItems,
+            CurrentPage = request.CurrentPage > 0 ? request.CurrentPage : 1,
+            PageSize = pageSize,
+            TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize),
+            SearchTerm = request.SearchTerm,
+            CategoryId = request.CategoryId,
+            MinPrice = request.MinPrice,
+            MaxPrice = request.MaxPrice,
+            CurrentSort = request.CurrentSort
+        };
+
+        return View(viewModel);
+    }
+    // ... các action khác như Index() ...
+
+    // GET: /Product/Details/5
+    public async Task<IActionResult> Details(int id)
+    {
+        var product = await _context.Products
+            .Include(p => p.Category) // Lấy cả thông tin danh mục
+            .FirstOrDefaultAsync(m => m.ProductId == id);
+
+        if (product == null)
+        {
+            return NotFound(); // Trả về 404 nếu không tìm thấy sản phẩm
+        }
+
+        // Bạn sẽ cần tạo một View tên là "Details.cshtml" trong thư mục "Views/Product"
+        return View(product);
+    }
+
+    // ... các action khác ...
 }

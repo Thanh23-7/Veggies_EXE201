@@ -61,7 +61,7 @@ namespace Veggies_EXE201.Models.ViewModels
 
         // THUỘC TÍNH MỚI: Dùng để điền dữ liệu cho thẻ <select> trong View
 
-        public List<SelectListItem> AvailableRoles { get; } = new List<SelectListItem>
+        public List<SelectListItem> AvailableRoles { get; set; } = new List<SelectListItem>
 
         {
 

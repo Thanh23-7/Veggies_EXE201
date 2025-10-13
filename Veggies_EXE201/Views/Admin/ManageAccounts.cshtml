@@ -1,0 +1,56 @@
+﻿@* @model IEnumerable<Veggies_EXE201.Models.ApplicationUser> *@
+
+@* @{ *@
+@*     Layout = "~/Views/Shared/_AdminLayout.cshtml"; *@
+@*     ViewData["Title"] = "Quản lý Tài khoản"; *@
+@* } *@
+
+@* <table class="table table-striped table-bordered"> *@
+@*     <thead class="thead-dark"> *@
+@*         <tr> *@
+@*             <th>ID</th> *@
+@*             <th>Tên đăng nhập</th> *@
+@*             <th>Email</th> *@
+@*             <th>Họ và tên</th> *@
+@*             <th>Trạng thái</th> *@
+@*             <th style="width: 150px;">Hành động</th> *@
+@*         </tr> *@
+@*     </thead> *@
+@*     <tbody> *@
+@*         @foreach (var user in Model) *@
+@*         { *@
+@*             <tr> *@
+@*                 <td>@user.Id</td> *@
+@*                 <td>@user.UserName</td> *@
+@*                 <td>@user.Email</td> *@
+@*                 <td>@user.FullName</td> *@
+@*                 <td> *@
+@*                     @if (user.IsBanned) *@
+@*                     { *@
+@*                         <span class="badge bg-danger">Bị cấm</span> *@
+@*                     } *@
+@*                     else *@
+@*                     { *@
+@*                         <span class="badge bg-success">Hoạt động</span> *@
+@*                     } *@
+@*                 </td> *@
+@*                 <td> *@
+@*                     @if (user.IsBanned) *@
+@*                     { *@
+@*                         <form asp-action="UnbanUser" asp-route-id="@user.Id" method="post" class="d-inline"> *@
+@*                             @Html.AntiForgeryToken() *@
+@*                             <button type="submit" class="btn btn-success btn-sm">Bỏ cấm</button> *@
+@*                         </form> *@
+@*                     } *@
+@*                     else *@
+@*                     { *@
+@*                         <form asp-action="BanUser" asp-route-id="@user.Id" method="post" class="d-inline"> *@
+@*                             @Html.AntiForgeryToken() *@
+@*                             <button type="submit" class="btn btn-warning btn-sm">Cấm</button> *@
+@*                         </form> *@
+@*                     } *@
+@*                 </td> *@
+@*             </tr> *@
+@*         } *@
+@*     </tbody> *@
+@* </table> *@

@@ -1,0 +1,46 @@
+﻿@* Nhận model User trực tiếp *@
+@model Veggies_EXE201.Models.User
+
+@{
+    ViewData["Title"] = "Hồ Sơ Của Tôi";
+}
+
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header">
+            <h2>@ViewData["Title"]</h2>
+        </div>
+        <div class="card-body">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+            }
+
+            <div class="row">
+                <div class="col-md-4 text-center">
+                    <img src="@(Model.AvatarUrl ?? "/images/default-avatar.png")"
+                         class="img-fluid rounded-circle mb-3" alt="Ảnh đại diện"
+                         style="width: 150px; height: 150px; object-fit: cover;">
+                </div>
+                <div class="col-md-8">
+                    <dl class="row">
+                        <dt class="col-sm-3">Họ và tên:</dt>
+                        <dd class="col-sm-9">@Model.FullName</dd>
+
+                        <dt class="col-sm-3">Email:</dt>
+                        <dd class="col-sm-9">@Model.Email</dd>
+
+                        <dt class="col-sm-3">Số điện thoại:</dt>
+                        <dd class="col-sm-9">@(Model.Phone ?? "Chưa cập nhật")</dd>
+
+                        <dt class="col-sm-3">Địa chỉ:</dt>
+                        <dd class="col-sm-9">@(Model.Address ?? "Chưa cập nhật")</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-end">
+            <a asp-action="EditProfile" class="btn btn-primary">Chỉnh Sửa Hồ Sơ</a>
+        </div>
+    </div>
+</div>
