@@ -54,6 +54,11 @@ namespace Veggies_EXE201.Services
             {
                 FullName = model.FullName,
                 Email = model.Email,
+                Phone = model.Phone,
+                Address = model.Address,
+                AvatarUrl = model.AvatarUrl,
+                DateOfBirth = model.DateOfBirth,
+                Gender = model.Gender,
 
                 // CẬP NHẬT: Gán Role bằng giá trị người dùng đã chọn
                 // Giá trị này phải khớp với ràng buộc CHECK trong DB ('Customer' hoặc 'Seller')
@@ -91,6 +96,40 @@ namespace Veggies_EXE201.Services
             {
                 return (false, "Lỗi không xác định khi lưu dữ liệu.");
             }
+        }
+
+        // Phương thức kiểm tra quyền Admin
+        public async Task<bool> IsAdminAsync(int userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            return user?.Role == "Admin";
+        }
+
+        // Phương thức lấy thông tin Admin
+        public async Task<User?> GetAdminAsync(int userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            return user?.Role == "Admin" ? user : null;
+        }
+
+        // Phương thức lấy tất cả người dùng (cho Admin)
+        public async Task<List<User>> GetAllUsersAsync()
+        {
+            return await _context.Users.ToListAsync();
+        }
+
+        // Phương thức cập nhật trạng thái người dùng
+        public async Task<bool> UpdateUserStatusAsync(int userId, bool isActive)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user != null)
+            {
+                // Thêm trường IsActive vào User model nếu cần
+                // user.IsActive = isActive;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
         }
     }
 }

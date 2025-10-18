@@ -39,6 +39,8 @@ builder.Services.AddScoped<AuthService>(); // AuthService không cần interface
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IPayOSService, PayOSService>();
+builder.Services.AddScoped<ReviewService>(); // Đăng ký ReviewService
+builder.Services.AddScoped<Veggies_EXE201.Services.ProductService>();
 
 // =========================================================================
 
@@ -61,6 +63,9 @@ app.UseSession(); // 2. Kích hoạt Session để các controller có thể s�
 
 app.UseAuthentication(); // 3. Xác định người dùng là ai (đọc cookie)
 app.UseAuthorization(); // 4. Kiểm tra xem người dùng có quyền truy cập endpoint đó không
+
+// 5. Admin Middleware (kiểm tra quyền Admin)
+app.UseMiddleware<Veggies_EXE201.Middleware.AdminMiddleware>();
 
 // 5. Ánh xạ request tới Controller Action tương ứng
 app.MapControllerRoute(

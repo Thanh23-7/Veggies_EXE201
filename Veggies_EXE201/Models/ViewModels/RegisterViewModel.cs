@@ -43,7 +43,7 @@ namespace Veggies_EXE201.Models.ViewModels
         // CÁC TRƯỜNG MỚI ĐƯỢC THÊM VÀO
         [Display(Name = "Ngày sinh")]
         [DataType(DataType.Date)]
-        public DateOnly? DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
 
         [Display(Name = "Giới tính")]
         public string? Gender { get; set; }

@@ -1,14 +1,247 @@
 ﻿@{
-    // Chỉ định layout sẽ sử dụng
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
     ViewData["Title"] = "Bảng điều khiển";
 }
 
-<div class="container">
+<!-- Removed container-fluid padding to use full screen width -->
+<div class="dashboard-container">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-0 text-gray-800">Chào mừng, @ViewData["AdminName"]!</h1>
+            <p class="text-muted">Bảng điều khiển quản trị hệ thống Veggies</p>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Tổng người dùng
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewData["TotalUsers"]</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Tổng sản phẩm
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewData["TotalProducts"]</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-box fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Tổng đơn hàng
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewData["TotalOrders"]</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Tổng đánh giá
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewData["TotalReviews"]</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-star fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
     <div class="row">
-        <div class="col">
-            <h3>Chào mừng, @ViewData["AdminName"]!</h3>
-            <p>Đây là trang quản trị hệ thống của Veggies.</p>
+        <!-- Orders Chart -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Thống kê đơn hàng theo tháng</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="ordersChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Chart -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Người dùng mới</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="usersChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thao tác nhanh</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="/admin/products" class="btn btn-primary btn-block">
+                                <i class="fas fa-box mr-2"></i>Quản lý sản phẩm
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="/admin/accounts" class="btn btn-success btn-block">
+                                <i class="fas fa-users mr-2"></i>Quản lý tài khoản
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="/admin/reviews" class="btn btn-info btn-block">
+                                <i class="fas fa-star mr-2"></i>Quản lý đánh giá
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Orders Chart
+    var ordersData = @Html.Raw(Json.Serialize(ViewData["MonthlyStats"]));
+    var ctx = document.getElementById("ordersChart").getContext('2d');
+    var ordersChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ordersData.Orders.map(o => o.month),
+            datasets: [{
+                label: 'Số đơn hàng',
+                data: ordersData.Orders.map(o => o.count),
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Users Chart
+    var ctx2 = document.getElementById("usersChart").getContext('2d');
+    var usersChart = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: ordersData.Users.map(u => u.month),
+            datasets: [{
+                data: ordersData.Users.map(u => u.count),
+                backgroundColor: [
+                    '#FF6384',
+                    '#36A2EB',
+                    '#FFCE56',
+                    '#4BC0C0',
+                    '#9966FF',
+                    '#FF9F40'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+</script>
+
+<style>
+    /* Full-width container without padding */
+    .dashboard-container {
+        width: 100%;
+        padding: 0;
+        margin: 0;
+    }
+
+    .border-left-primary {
+        border-left: 0.25rem solid #4e73df !important;
+    }
+
+    .border-left-success {
+        border-left: 0.25rem solid #1cc88a !important;
+    }
+
+    .border-left-info {
+        border-left: 0.25rem solid #36b9cc !important;
+    }
+
+    .border-left-warning {
+        border-left: 0.25rem solid #f6c23e !important;
+    }
+
+    .chart-area {
+        position: relative;
+        height: 10rem;
+        width: 100%;
+    }
+
+    .chart-pie {
+        position: relative;
+        height: 15rem;
+        width: 100%;
+    }
+</style>

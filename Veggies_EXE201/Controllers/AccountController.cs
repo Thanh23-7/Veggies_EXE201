@@ -68,13 +68,18 @@ namespace Veggies_EXE201.Controllers
             // 4. (Tùy chọn) Lưu UserId vào Session để truy cập nhanh
             HttpContext.Session.SetInt32("UserId", user.UserId);
 
-            // 5. Chuyển hướng an toàn
+            // 5. Chuyển hướng an toàn dựa trên role
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
                 return Redirect(returnUrl);
             }
             else
             {
+                // Chuyển hướng Admin về trang admin dashboard
+                if (user.Role == "Admin")
+                {
+                    return RedirectToAction("Index", "Admin");
+                }
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -133,8 +138,15 @@ namespace Veggies_EXE201.Controllers
             {
                 new SelectListItem { Value = "Customer", Text = "Khách hàng" },
                 new SelectListItem { Value = "Seller", Text = "Người bán" }
-                // Cân nhắc không hiển thị "Admin" công khai
+                // Không hiển thị "Admin" công khai để bảo mật
             };
+        }
+
+        // GET: /Account/AccessDenied
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }

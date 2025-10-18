@@ -19,11 +19,11 @@ public partial class User
 
     public string? AvatarUrl { get; set; }
 
-    public string? Role { get; set; } //1.Admin   2. Customer  3. Seller
+    public string? Role { get; set; } 
 
     public DateTime? CreatedAt { get; set; }
 
-    public DateOnly? DateOfBirth { get; set; }
+    public DateTime? DateOfBirth { get; set; }
 
     public string? Gender { get; set; }
 

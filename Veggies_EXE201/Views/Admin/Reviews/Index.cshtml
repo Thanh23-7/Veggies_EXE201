@@ -1,0 +1,257 @@
+@model IEnumerable<Veggies_EXE201.Models.Review>
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Quản lý Đánh giá";
+}
+
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Quản lý Đánh giá</h1>
+        <a href="/admin" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Quay lại Dashboard
+        </a>
+    </div>
+
+    <!-- Alert Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    <!-- DataTales Example -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách Đánh giá</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Sản phẩm</th>
+                            <th>Người đánh giá</th>
+                            <th>Điểm</th>
+                            <th>Nội dung</th>
+                            <th>Ngày đánh giá</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th>ID</th>
+                            <th>Sản phẩm</th>
+                            <th>Người đánh giá</th>
+                            <th>Điểm</th>
+                            <th>Nội dung</th>
+                            <th>Ngày đánh giá</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        @foreach (var review in Model)
+                        {
+                            <tr>
+                                <td>@review.ReviewId</td>
+                                <td>
+                                    <strong>@review.Product?.ProductName</strong>
+                                    @if (!string.IsNullOrEmpty(review.Product?.ProductImage))
+                                    {
+                                        <br><img src="@review.Product.ProductImage" alt="@review.Product.ProductName" class="img-thumbnail mt-1" style="width: 40px; height: 40px; object-fit: cover;">
+                                    }
+                                </td>
+                                <td>
+                                    <strong>@review.User?.FullName</strong>
+                                    <br><small class="text-muted">@review.User?.Email</small>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= review.Rating)
+                                            {
+                                                <i class="fas fa-star text-warning"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="far fa-star text-muted"></i>
+                                            }
+                                        }
+                                        <span class="ml-2 font-weight-bold">@review.Rating</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(review.Comment))
+                                    {
+                                        <div class="text-truncate" style="max-width: 200px;" title="@review.Comment">
+                                            @review.Comment
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Không có bình luận</span>
+                                    }
+                                </td>
+                                <td>@review.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#viewModal@(review.ReviewId)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <form method="post" action="/admin/reviews/delete/@review.ReviewId" style="display: inline;" onsubmit="return confirm('Bạn có chắc muốn xóa đánh giá này?')">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- View Modal -->
+                            <div class="modal fade" id="viewModal@(review.ReviewId)" tabindex="-1" role="dialog" aria-labelledby="viewModalLabel@(review.ReviewId)" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="viewModalLabel@(review.ReviewId)">Chi tiết đánh giá</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h6>Sản phẩm:</h6>
+                                                    <div class="d-flex align-items-center mb-3">
+                                                        @if (!string.IsNullOrEmpty(review.Product?.ProductImage))
+                                                        {
+                                                            <img src="@review.Product.ProductImage" alt="@review.Product.ProductName" class="img-thumbnail mr-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                                        }
+                                                        <div>
+                                                            <strong>@review.Product?.ProductName</strong>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h6>Người đánh giá:</h6>
+                                                    <p><strong>@review.User?.FullName</strong></p>
+                                                    <p class="text-muted">@review.User?.Email</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <hr>
+                                            
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <h6>Điểm đánh giá:</h6>
+                                                    <div class="d-flex align-items-center mb-3">
+                                                        @for (int i = 1; i <= 5; i++)
+                                                        {
+                                                            if (i <= review.Rating)
+                                                            {
+                                                                <i class="fas fa-star text-warning fa-lg"></i>
+                                                            }
+                                                            else
+                                                            {
+                                                                <i class="far fa-star text-muted fa-lg"></i>
+                                                            }
+                                                        }
+                                                        <span class="ml-3 h4 font-weight-bold text-warning">@review.Rating/5</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <h6>Bình luận:</h6>
+                                                    @if (!string.IsNullOrEmpty(review.Comment))
+                                                    {
+                                                        <div class="alert alert-light">
+                                                            <p class="mb-0">@review.Comment</p>
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <p class="text-muted">Không có bình luận</p>
+                                                    }
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <h6>Thông tin:</h6>
+                                                    <p class="text-muted">Đánh giá vào: @review.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                                            <form method="post" action="/admin/reviews/delete/@review.ReviewId" style="display: inline;" onsubmit="return confirm('Bạn có chắc muốn xóa đánh giá này?')">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-danger">
+                                                    <i class="fas fa-trash"></i> Xóa đánh giá
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Page level plugins -->
+<script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#dataTable').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/Vietnamese.json"
+            },
+            "pageLength": 25,
+            "order": [[ 0, "desc" ]]
+        });
+    });
+</script>
+
+<style>
+    .btn-group .btn {
+        margin-right: 2px;
+    }
+    .img-thumbnail {
+        border-radius: 4px;
+    }
+    .text-truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .fa-star {
+        font-size: 0.9em;
+    }
+    .fa-lg {
+        font-size: 1.5em;
+    }
+</style>
