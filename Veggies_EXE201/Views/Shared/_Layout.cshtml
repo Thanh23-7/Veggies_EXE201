@@ -51,6 +51,22 @@
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                                     <li><a class="dropdown-item" asp-controller="User" asp-action="Profile"><i class="fas fa-user-edit me-2"></i>Hồ sơ</a></li>
                                     <li><a class="dropdown-item" asp-controller="Order" asp-action="History"><i class="fas fa-box-open me-2"></i>Đơn hàng</a></li>
+                                    
+                                    @{
+                                        var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+                                    }
+                                    
+                                    @if (userRole == "Admin")
+                                    {
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Index"><i class="fas fa-cog me-2"></i>Admin Dashboard</a></li>
+                                    }
+                                    else if (userRole == "Seller")
+                                    {
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" asp-controller="Seller" asp-action="Index"><i class="fas fa-store me-2"></i>Seller Dashboard</a></li>
+                                    }
+                                    
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <form asp-controller="Account" asp-action="Logout" method="post">

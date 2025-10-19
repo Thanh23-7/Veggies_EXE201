@@ -1,0 +1,207 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_SellerLayout";
+}
+
+<div class="row">
+    <!-- Statistics Cards -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stats-card">
+            <div class="d-flex align-items-center">
+                <div class="stats-icon bg-primary-gradient">
+                    <i class="fas fa-box"></i>
+                </div>
+                <div class="ms-3">
+                    <h5 class="mb-0">@ViewData["TotalProducts"]</h5>
+                    <p class="text-muted mb-0">Tổng sản phẩm</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stats-card">
+            <div class="d-flex align-items-center">
+                <div class="stats-icon bg-success-gradient">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div class="ms-3">
+                    <h5 class="mb-0">@ViewData["TotalOrders"]</h5>
+                    <p class="text-muted mb-0">Tổng đơn hàng</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stats-card">
+            <div class="d-flex align-items-center">
+                <div class="stats-icon bg-warning-gradient">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="ms-3">
+                    <h5 class="mb-0">@((ViewData["TotalRevenue"] as decimal?)?.ToString("N0") ?? "0") VNĐ</h5>
+                    <p class="text-muted mb-0">Tổng doanh thu</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stats-card">
+            <div class="d-flex align-items-center">
+                <div class="stats-icon bg-info-gradient">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="ms-3">
+                    <h5 class="mb-0">@ViewData["PendingOrders"]</h5>
+                    <p class="text-muted mb-0">Đơn chờ xử lý</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Top Products -->
+    <div class="col-lg-8 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-trophy text-warning"></i> Sản phẩm bán chạy nhất
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (ViewData["TopProducts"] != null)
+                {
+                    var topProducts = ViewData["TopProducts"] as List<Veggies_EXE201.Models.Product>;
+                    if (topProducts.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Hình ảnh</th>
+                                        <th>Tên sản phẩm</th>
+                                        <th>Giá</th>
+                                        <th>Tồn kho</th>
+                                        <th>Đánh giá</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var product in topProducts)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(product.ProductImage))
+                                                {
+                                                    <img src="@product.ProductImage" alt="@product.ProductName"
+                                                         class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
+                                                }
+                                                else
+                                                {
+                                                    <div class="bg-light d-flex align-items-center justify-content-center" 
+                                                         style="width: 50px; height: 50px;">
+                                                        <i class="fas fa-image text-muted"></i>
+                                                    </div>
+                                                }
+                                            </td>
+                                            <td>
+                                                <strong>@product.ProductName</strong>
+                                                @if (!string.IsNullOrEmpty(product.Description))
+                                                {
+                                                    <br><small class="text-muted">@(product.Description.Length > 50 ? product.Description.Substring(0, 50) + "..." : product.Description)</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="text-success fw-bold">@product.Price.ToString("N0") VNĐ</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge @((product.Stock ?? 0) > 10 ? "bg-success" : (product.Stock ?? 0) > 0 ? "bg-warning" : "bg-danger")">
+                                                    @(product.Stock ?? 0)
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @{
+                                                    var avgRating = product.Reviews?.Any() == true ? product.Reviews.Average(r => r.Rating) : 0;
+                                                }
+                                                <div class="d-flex align-items-center">
+                                                    @for (int i = 1; i <= 5; i++)
+                                                    {
+                                                        <i class="fas fa-star @(i <= avgRating ? "text-warning" : "text-muted")"></i>
+                                                    }
+                                                    <small class="ms-1 text-muted">(@product.Reviews?.Count ?? 0)</small>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Chưa có sản phẩm nào</p>
+                            <a asp-action="CreateProduct" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Thêm sản phẩm đầu tiên
+                            </a>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-bolt text-primary"></i> Thao tác nhanh
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a asp-action="CreateProduct" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Thêm sản phẩm mới
+                    </a>
+                    <a asp-action="ManageOrders" class="btn btn-success">
+                        <i class="fas fa-shopping-cart"></i> Xem đơn hàng
+                    </a>
+                    <a asp-action="Analytics" class="btn btn-info">
+                        <i class="fas fa-chart-line"></i> Xem thống kê
+                    </a>
+                    <a asp-controller="User" asp-action="Profile" class="btn btn-outline-secondary">
+                        <i class="fas fa-user"></i> Cập nhật hồ sơ
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-history text-info"></i> Hoạt động gần đây
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center py-3">
+                    <i class="fas fa-clock fa-2x text-muted mb-2"></i>
+                    <p class="text-muted">Tính năng đang được phát triển</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            $('.alert').fadeOut('slow');
+        }, 5000);
+    </script>
+}

@@ -1,0 +1,159 @@
+@model IEnumerable<Veggies_EXE201.Models.Product>
+@{
+    ViewData["Title"] = "Quản lý Sản phẩm";
+    Layout = "_SellerLayout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-box text-primary"></i> Quản lý Sản phẩm</h2>
+    <a asp-action="CreateProduct" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Thêm sản phẩm mới
+    </a>
+</div>
+
+@if (Model.Any())
+{
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Hình ảnh</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Danh mục</th>
+                            <th>Giá</th>
+                            <th>Tồn kho</th>
+                            <th>Đánh giá</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var product in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(product.ProductImage))
+                                    {
+                                        <img src="@product.ProductImage" alt="@product.ProductName"
+                                             class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-light d-flex align-items-center justify-content-center" 
+                                             style="width: 60px; height: 60px;">
+                                            <i class="fas fa-image text-muted"></i>
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    <div>
+                                        <strong>@product.ProductName</strong>
+                                        @if (!string.IsNullOrEmpty(product.Description))
+                                        {
+                                            <br><small class="text-muted">@(product.Description.Length > 60 ? product.Description.Substring(0, 60) + "..." : product.Description)</small>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">@(product.Category?.CategoryName ?? "Chưa phân loại")</span>
+                                </td>
+                                <td>
+                                    <span class="text-success fw-bold">@product.Price.ToString("N0") VNĐ</span>
+                                </td>
+                                <td>
+                                    <span class="badge @((product.Stock ?? 0) > 10 ? "bg-success" : (product.Stock ?? 0) > 0 ? "bg-warning" : "bg-danger")">
+                                        @(product.Stock ?? 0)
+                                    </span>
+                                </td>
+                                <td>
+                                    @{
+                                        var avgRating = product.Reviews?.Any() == true ? product.Reviews.Average(r => r.Rating) : 0;
+                                        var reviewCount = product.Reviews?.Count ?? 0;
+                                    }
+                                    <div class="d-flex align-items-center">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <i class="fas fa-star @(i <= avgRating ? "text-warning" : "text-muted")" style="font-size: 12px;"></i>
+                                        }
+                                        <small class="ms-1 text-muted">(@reviewCount)</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    @{
+                                        var status = product.Stock > 0 ? "Còn hàng" : "Hết hàng";
+                                        var statusClass = product.Stock > 0 ? "bg-success" : "bg-danger";
+                                    }
+                                    <span class="badge @statusClass">@status</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="EditProduct" asp-route-id="@product.ProductId" 
+                                           class="btn btn-sm btn-outline-primary" title="Chỉnh sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                onclick="confirmDelete(@product.ProductId, '@product.ProductName')" title="Xóa">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="text-center py-5">
+        <i class="fas fa-box-open fa-4x text-muted mb-4"></i>
+        <h4 class="text-muted">Chưa có sản phẩm nào</h4>
+        <p class="text-muted">Hãy bắt đầu bằng cách thêm sản phẩm đầu tiên của bạn!</p>
+        <a asp-action="CreateProduct" class="btn btn-primary btn-lg">
+            <i class="fas fa-plus"></i> Thêm sản phẩm đầu tiên
+        </a>
+    </div>
+}
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận xóa sản phẩm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa sản phẩm <strong id="productName"></strong>?</p>
+                <p class="text-danger"><small>Hành động này không thể hoàn tác!</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Xóa
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(productId, productName) {
+            document.getElementById('productName').textContent = productName;
+            document.getElementById('deleteForm').action = '@Url.Action("DeleteProduct", "Seller")/' + productId;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            $('.alert').fadeOut('slow');
+        }, 5000);
+    </script>
+}

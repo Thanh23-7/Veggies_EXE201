@@ -19,7 +19,7 @@ public partial class User
 
     public string? AvatarUrl { get; set; }
 
-    public string? Role { get; set; } 
+    public string? Role { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 
@@ -29,7 +29,11 @@ public partial class User
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 
+    public virtual ICollection<Product> Products { get; set; } = new List<Product>();
+
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+
+    public virtual ICollection<ActivityLog> ActivityLogs { get; set; } = new List<ActivityLog>();
 
     public virtual ShoppingCart? ShoppingCart { get; set; }
 }

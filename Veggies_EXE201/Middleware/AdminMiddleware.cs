@@ -34,6 +34,26 @@ namespace Veggies_EXE201.Middleware
                 }
             }
 
+            // Kiểm tra nếu đang truy cập vào route seller
+            if (context.Request.Path.StartsWithSegments("/seller"))
+            {
+                // Kiểm tra xem user có đăng nhập không
+                if (!context.User.Identity.IsAuthenticated)
+                {
+                    context.Response.Redirect("/Account/Login?returnUrl=" + Uri.EscapeDataString(context.Request.Path));
+                    return;
+                }
+
+                // Kiểm tra role Seller
+                var role = context.User.FindFirstValue(ClaimTypes.Role);
+                if (role != "Seller")
+                {
+                    context.Response.StatusCode = 403;
+                    await context.Response.WriteAsync("Bạn không có quyền truy cập trang này.");
+                    return;
+                }
+            }
+
             await _next(context);
         }
     }

@@ -75,10 +75,14 @@ namespace Veggies_EXE201.Controllers
             }
             else
             {
-                // Chuyển hướng Admin về trang admin dashboard
+                // Chuyển hướng dựa trên role
                 if (user.Role == "Admin")
                 {
                     return RedirectToAction("Index", "Admin");
+                }
+                else if (user.Role == "Seller")
+                {
+                    return RedirectToAction("Index", "Seller");
                 }
                 return RedirectToAction("Index", "Home");
             }

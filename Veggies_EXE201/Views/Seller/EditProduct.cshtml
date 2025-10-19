@@ -1,0 +1,134 @@
+@model Veggies_EXE201.Models.Product
+@{
+    ViewData["Title"] = "Chỉnh sửa sản phẩm";
+    Layout = "_SellerLayout";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-edit text-primary"></i> Chỉnh sửa sản phẩm
+                </h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="EditProduct" method="post" enctype="multipart/form-data">
+                    <input asp-for="ProductId" type="hidden" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ProductName" class="form-label">Tên sản phẩm *</label>
+                            <input asp-for="ProductName" class="form-control" placeholder="Nhập tên sản phẩm" />
+                            <span asp-validation-for="ProductName" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="CategoryId" class="form-label">Danh mục *</label>
+                            <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.Categories">
+                                <option value="">-- Chọn danh mục --</option>
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label">Mô tả sản phẩm</label>
+                        <textarea asp-for="Description" class="form-control" rows="4" 
+                                  placeholder="Mô tả chi tiết về sản phẩm..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="Price" class="form-label">Giá bán (VNĐ) *</label>
+                            <input asp-for="Price" class="form-control" type="number"  min="0" 
+                                   placeholder="0" />
+                            <span asp-validation-for="Price" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="Stock" class="form-label">Số lượng tồn kho *</label>
+                            <input asp-for="Stock" class="form-control" type="number" min="0"
+                                   placeholder="0" />
+                            <span asp-validation-for="Stock" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Hình ảnh hiện tại</label>
+                            @if (!string.IsNullOrEmpty(Model.ProductImage))
+                            {
+                                <div class="mb-2">
+                                    <img src="@Model.ProductImage" alt="@Model.ProductName"
+                                         class="img-thumbnail" style="max-width: 100px; max-height: 100px;">
+                                </div>
+                            }
+                            <input type="file" name="productImage" class="form-control" accept="image/*" />
+                            <small class="form-text text-muted">Chọn hình ảnh mới (để trống nếu không thay đổi)</small>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="VietGapCertificateUrl" class="form-label">Link chứng nhận VietGAP</label>
+                            <input asp-for="VietGapCertificateUrl" class="form-control" type="url" 
+                                   placeholder="https://example.com/certificate" />
+                            <span asp-validation-for="VietGapCertificateUrl" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="CultivationVideoUrl" class="form-label">Link video canh tác</label>
+                            <input asp-for="CultivationVideoUrl" class="form-control" type="url" 
+                                   placeholder="https://youtube.com/watch?v=..." />
+                            <span asp-validation-for="CultivationVideoUrl" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="ManageProducts" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Quay lại
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Cập nhật sản phẩm
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Preview image when selected
+        document.querySelector('input[name="productImage"]').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Create preview if it doesn't exist
+                    let preview = document.getElementById('imagePreview');
+                    if (!preview) {
+                        preview = document.createElement('div');
+                        preview.id = 'imagePreview';
+                        preview.className = 'mt-2';
+                        e.target.parentNode.appendChild(preview);
+                    }
+                    preview.innerHTML = '<img src="' + e.target.result + '" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Format price input
+        document.querySelector('input[name="Price"]').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value) {
+                e.target.value = parseInt(value).toLocaleString('vi-VN');
+            }
+        });
+    </script>
+}

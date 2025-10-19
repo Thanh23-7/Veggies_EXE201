@@ -1,0 +1,170 @@
+@model IEnumerable<Veggies_EXE201.Models.Order>
+@{
+    ViewData["Title"] = "Quản lý Đơn hàng";
+    Layout = "_SellerLayout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-shopping-cart text-primary"></i> Quản lý Đơn hàng</h2>
+    <div class="btn-group">
+        <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+            <i class="fas fa-filter"></i> Lọc theo trạng thái
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="?status=">Tất cả</a></li>
+            <li><a class="dropdown-item" href="?status=Pending">Chờ xử lý</a></li>
+            <li><a class="dropdown-item" href="?status=Processing">Đang xử lý</a></li>
+            <li><a class="dropdown-item" href="?status=Shipped">Đã giao</a></li>
+            <li><a class="dropdown-item" href="?status=Delivered">Hoàn thành</a></li>
+            <li><a class="dropdown-item" href="?status=Cancelled">Đã hủy</a></li>
+        </ul>
+    </div>
+</div>
+
+@if (Model.Any())
+{
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Mã đơn hàng</th>
+                            <th>Khách hàng</th>
+                            <th>Sản phẩm</th>
+                            <th>Số lượng</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày đặt</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>#@order.OrderId</strong>
+                                </td>
+                                <td>
+                                    <div>
+                                        <strong>@order.User?.FullName</strong>
+                                        <br><small class="text-muted">@order.User?.Email</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    @foreach (var detail in order.OrderDetails)
+                                    {
+                                        <div class="d-flex align-items-center mb-1">
+                                            @if (!string.IsNullOrEmpty(detail.Product?.ProductImage))
+                                            {
+                                                <img src="@detail.Product.ProductImage" alt="@detail.Product.ProductName"
+                                                     class="img-thumbnail me-2" style="width: 30px; height: 30px; object-fit: cover;">
+                                            }
+                                            <div>
+                                                <small>@detail.Product?.ProductName</small>
+                                                <br><small class="text-muted">@(detail.TotalPrice?.ToString("N0") ?? "0") VNĐ</small>
+                                            </div>
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    @foreach (var detail in order.OrderDetails)
+                                    {
+                                        <span class="badge bg-secondary me-1">@detail.Quantity</span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="text-success fw-bold">@(order.TotalAmount?.ToString("N0") ?? "0") VNĐ</span>
+                                </td>
+                                <td>
+                                    @{
+                                        var statusClass = order.Status switch
+                                        {
+                                            "Pending" => "bg-warning",
+                                            "Processing" => "bg-info",
+                                            "Shipped" => "bg-primary",
+                                            "Delivered" => "bg-success",
+                                            "Cancelled" => "bg-danger",
+                                            _ => "bg-secondary"
+                                        };
+                                    }
+                                    <span class="badge @statusClass">@order.Status</span>
+                                </td>
+                                <td>
+                                    <small>@order.OrderDate?.ToString("dd/MM/yyyy HH:mm")</small>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        @if (order.Status == "Pending")
+                                        {
+                                            <form method="post" asp-action="UpdateOrderStatus" style="display: inline;">
+                                                <input type="hidden" name="id" value="@order.OrderId" />
+                                                <input type="hidden" name="status" value="Processing" />
+                                                <button type="submit" class="btn btn-sm btn-success" title="Xác nhận đơn hàng">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        @if (order.Status == "Processing")
+                                        {
+                                            <form method="post" asp-action="UpdateOrderStatus" style="display: inline;">
+                                                <input type="hidden" name="id" value="@order.OrderId" />
+                                                <input type="hidden" name="status" value="Shipped" />
+                                                <button type="submit" class="btn btn-sm btn-primary" title="Đánh dấu đã giao">
+                                                    <i class="fas fa-truck"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        @if (order.Status == "Shipped")
+                                        {
+                                            <form method="post" asp-action="UpdateOrderStatus" style="display: inline;">
+                                                <input type="hidden" name="id" value="@order.OrderId" />
+                                                <input type="hidden" name="status" value="Delivered" />
+                                                <button type="submit" class="btn btn-sm btn-success" title="Hoàn thành đơn hàng">
+                                                    <i class="fas fa-check-circle"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        @if (order.Status == "Pending" || order.Status == "Processing")
+                                        {
+                                            <form method="post" asp-action="UpdateOrderStatus" style="display: inline;">
+                                                <input type="hidden" name="id" value="@order.OrderId" />
+                                                <input type="hidden" name="status" value="Cancelled" />
+                                                <button type="submit" class="btn btn-sm btn-danger" 
+                                                        onclick="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')" 
+                                                        title="Hủy đơn hàng">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="text-center py-5">
+        <i class="fas fa-shopping-cart fa-4x text-muted mb-4"></i>
+        <h4 class="text-muted">Chưa có đơn hàng nào</h4>
+        <p class="text-muted">Các đơn hàng sẽ xuất hiện ở đây khi khách hàng mua sản phẩm của bạn.</p>
+        <a asp-action="ManageProducts" class="btn btn-primary">
+            <i class="fas fa-box"></i> Quản lý sản phẩm
+        </a>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            $('.alert').fadeOut('slow');
+        }, 5000);
+    </script>
+}

@@ -86,6 +86,12 @@
                                 Quản lý Đánh giá
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "ActivityLogs" ? "active" : "")" asp-controller="Admin" asp-action="ActivityLogs">
+                                <i class="fas fa-list-alt mr-2"></i>
+                                Activity Log
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </nav>

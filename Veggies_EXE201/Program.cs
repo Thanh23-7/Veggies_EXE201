@@ -41,6 +41,7 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IPayOSService, PayOSService>();
 builder.Services.AddScoped<ReviewService>(); // Đăng ký ReviewService
 builder.Services.AddScoped<Veggies_EXE201.Services.ProductService>();
+builder.Services.AddScoped<ActivityLogService>(); // Đăng ký ActivityLogService
 
 // =========================================================================
 

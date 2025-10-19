@@ -15,13 +15,6 @@ public partial class ActivityLog
 
     public DateTime? CreatedAt { get; set; }
 
-    // Thêm các thuộc tính bị thiếu
-    public DateTime? Timestamp 
-    { 
-        get => CreatedAt; 
-        set => CreatedAt = value; 
-    }
-
     public string? IpAddress { get; set; }
 
     // Navigation property

@@ -25,6 +25,10 @@ public partial class Product
 
     public string? ProductImage { get; set; }
 
+    public int? SellerId { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+
     public virtual ICollection<CartDetail> CartDetails { get; set; } = new List<CartDetail>();
 
     public virtual Category? Category { get; set; }
@@ -32,4 +36,6 @@ public partial class Product
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+
+    public virtual User? Seller { get; set; }
 }

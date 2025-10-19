@@ -21,6 +21,8 @@ public partial class Order
 
     public string? Notes { get; set; }
 
+    public DateTime? UpdatedAt { get; set; }
+
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();

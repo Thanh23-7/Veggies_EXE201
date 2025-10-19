@@ -50,6 +50,12 @@ public partial class VeggiesDb2Context : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
             entity.Property(e => e.Details).HasMaxLength(500);
+            entity.Property(e => e.IpAddress).HasMaxLength(50);
+
+            entity.HasOne(d => d.User).WithMany(p => p.ActivityLogs)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_ActivityLogs_Users");
         });
 
         modelBuilder.Entity<CartDetail>(entity =>
@@ -157,6 +163,8 @@ public partial class VeggiesDb2Context : DbContext
             entity.HasOne(d => d.Category).WithMany(p => p.Products)
                 .HasForeignKey(d => d.CategoryId)
                 .HasConstraintName("FK__Products__Catego__440B1D61");
+
+            entity.HasOne(d => d.Seller).WithMany(p => p.Products).HasForeignKey(d => d.SellerId);
         });
 
         modelBuilder.Entity<Review>(entity =>

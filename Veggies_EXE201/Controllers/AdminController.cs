@@ -19,17 +19,20 @@ namespace Veggies_EXE201.Controllers
         private readonly VeggiesDb2Context _context;
         private readonly ProductService _productService;
         private readonly ReviewService _reviewService;
+        private readonly ActivityLogService _activityLogService;
 
         public AdminController(
             AuthService authService,
             VeggiesDb2Context context,
             ProductService productService,
-            ReviewService reviewService)
+            ReviewService reviewService,
+            ActivityLogService activityLogService)
         {
             _authService = authService;
             _context = context;
             _productService = productService;
             _reviewService = reviewService;
+            _activityLogService = activityLogService;
         }
 
         //--- Trang Dashboard chính của Admin ---
@@ -206,6 +209,130 @@ namespace Veggies_EXE201.Controllers
             }
             return RedirectToAction(nameof(ManageReviews));
         }
+
+        //--- Quản lý Activity Log ---
+        [HttpGet("logs")]
+        public async Task<IActionResult> ActivityLogs(
+            int page = 1,
+            int pageSize = 20,
+            int? userId = null,
+            string? action = null,
+            DateTime? startDate = null,
+            DateTime? endDate = null,
+            string? searchTerm = null)
+        {
+            ViewData["Title"] = "Quản lý Activity Log";
+
+            // Lấy danh sách users để hiển thị trong dropdown
+            var users = await _context.Users
+                .Select(u => new { u.UserId, u.FullName, u.Email })
+                .ToListAsync();
+            ViewData["Users"] = users;
+
+            // Lấy danh sách actions phổ biến
+            var popularActions = await _activityLogService.GetPopularActionsAsync();
+            ViewData["PopularActions"] = popularActions;
+
+            // Lấy activity logs với phân trang
+            var (logs, totalCount) = await _activityLogService.GetActivityLogsAsync(
+                page, pageSize, userId, action, startDate, endDate, searchTerm);
+
+            // Tính toán thông tin phân trang
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+            ViewData["CurrentPage"] = page;
+            ViewData["TotalPages"] = totalPages;
+            ViewData["TotalCount"] = totalCount;
+            ViewData["PageSize"] = pageSize;
+
+            // Giữ lại các tham số lọc
+            ViewData["SelectedUserId"] = userId;
+            ViewData["SelectedAction"] = action;
+            ViewData["StartDate"] = startDate?.ToString("yyyy-MM-dd");
+            ViewData["EndDate"] = endDate?.ToString("yyyy-MM-dd");
+            ViewData["SearchTerm"] = searchTerm;
+
+            return View("Logs/Index", logs);
+        }
+
+        [HttpGet("logs/export")]
+        public async Task<IActionResult> ExportActivityLogs(
+            int? userId = null,
+            string? action = null,
+            DateTime? startDate = null,
+            DateTime? endDate = null,
+            string? searchTerm = null)
+        {
+            // Lấy tất cả logs theo điều kiện lọc (không phân trang)
+            var (logs, _) = await _activityLogService.GetActivityLogsAsync(
+                1, int.MaxValue, userId, action, startDate, endDate, searchTerm);
+
+            // Tạo CSV content
+            var csvContent = "Thời gian,User,Action,Chi tiết,IP Address\n";
+            foreach (var log in logs)
+            {
+                var userName = log.User?.FullName ?? "System";
+                var timestamp = log.CreatedAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? "";
+                var details = log.Details?.Replace("\"", "\"\"") ?? "";
+                var ipAddress = log.IpAddress ?? "";
+
+                csvContent += $"\"{timestamp}\",\"{userName}\",\"{log.Action}\",\"{details}\",\"{ipAddress}\"\n";
+            }
+
+            var fileName = $"activity_logs_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+            var bytes = System.Text.Encoding.UTF8.GetBytes(csvContent);
+
+            return File(bytes, "text/csv", fileName);
+        }
+
+        [HttpPost("logs/cleanup")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CleanupOldLogs(int daysToKeep = 90)
+        {
+            try
+            {
+                var deletedCount = await _activityLogService.CleanupOldLogsAsync(daysToKeep);
+                TempData["SuccessMessage"] = $"Đã xóa {deletedCount} bản ghi log cũ hơn {daysToKeep} ngày.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Lỗi khi dọn dẹp log: " + ex.Message;
+            }
+
+            return RedirectToAction(nameof(ActivityLogs));
+        }
+
+        [HttpGet("logs/stats")]
+        public async Task<IActionResult> ActivityLogStats()
+        {
+            ViewData["Title"] = "Thống kê Activity Log";
+
+            // Thống kê theo ngày (30 ngày gần nhất)
+            var dailyStats = await _activityLogService.GetActivityStatsAsync(30);
+            ViewData["DailyStats"] = dailyStats;
+
+            // Thống kê theo action
+            var actionStats = await _context.ActivityLogs
+                .GroupBy(log => log.Action)
+                .Select(g => new { Action = g.Key, Count = g.Count() })
+                .OrderByDescending(x => x.Count)
+                .Take(10)
+                .ToListAsync();
+            ViewData["ActionStats"] = actionStats;
+
+            // Thống kê theo user
+            var userStats = await _context.ActivityLogs
+                .Include(log => log.User)
+                .Where(log => log.UserId.HasValue)
+                .GroupBy(log => new { log.UserId, log.User.FullName })
+                .Select(g => new { UserName = g.Key.FullName, Count = g.Count() })
+                .OrderByDescending(x => x.Count)
+                .Take(10)
+                .ToListAsync();
+            ViewData["UserStats"] = userStats;
+
+            return View("Logs/Stats");
+        }
+
         private async Task<Dictionary<string, object>> GetMonthlyStatistics()
         {
             var endDate = DateTime.Now;
