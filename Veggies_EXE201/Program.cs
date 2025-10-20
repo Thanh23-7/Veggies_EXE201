@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.HttpOverrides;
 using Veggies_EXE201.Models;
 using Veggies_EXE201.Repositories;
 using Veggies_EXE201.Services;
@@ -46,6 +47,17 @@ builder.Services.AddScoped<ActivityLogService>(); // Đăng ký ActivityLogServi
 // =========================================================================
 
 var app = builder.Build();
+
+// Nhận scheme/host từ proxy (Render)
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<VeggiesDb2Context>();
+    db.Database.Migrate(); // cần Microsoft.EntityFrameworkCore
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
