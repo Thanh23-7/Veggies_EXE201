@@ -1,0 +1,9 @@
+.git
+.gitignore
+**/bin
+**/obj
+out
+**/.vs
+*.user
+*.swp
+*.zip
